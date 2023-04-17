@@ -1,6 +1,7 @@
 from audio_class import Audio
 from tinh_toan_class import TinhToan
 from plot_class import BieuDo
+from loc_class import Loc
 import numpy as np
 
 
@@ -41,25 +42,31 @@ tinhToan = TinhToan()
 # BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value9, title="FFT")
 # BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value10, title="IFFT")
 
+loc = Loc()
 
 
-print(Audio1.sr)
-value11 = tinhToan.lowpass_filter(Audio1,100)
-value12 = tinhToan.highpass_filter(Audio1,100)
-value13 = tinhToan.chebyshev_lowpass_filter(Audio1,100)
-value14 = tinhToan.chebyshev_highpass_filter(Audio1,100)
+# mode = 'LPF' | 'BDF' | 'BSF' | 'HPF' | 'EQ'
+# window = 'bartlett' | 'hamming' | 'hanning' | 'blackman'
+#
+#
+#
+#
+value = np.convolve(loc.loc_am_thanh('LPF','bartlett'), Audio1.a, mode='same')
+BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value, title="Lọc LPF với cửa sổ bartlett")
 
-# Tạo mảng gains
-gains = np.ones(Audio1.sr//2)
-gains[5000] = 2
-gains[10000] = 0.5
+value1 = np.convolve(loc.loc_am_thanh('BDF','blackman'), Audio1.a, mode='same')
+BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value1, title="Lọc BDF với cửa sổ blackman")
 
-value15 = tinhToan.linear_equalizer(Audio1,gains)
-# BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value11, title="LF")
-# BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value12, title="LF")
-# BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value13, title="LF")
-# BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value14, title="LF")
-BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value15, title="CAn bang")
+value2 = np.convolve(loc.loc_am_thanh('BSF','blackman'), Audio1.a, mode='same')
+BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value2, title="Lọc BSF với cửa sổ blackman")
+
+value3 = np.convolve(loc.loc_am_thanh('HPF','blackman'), Audio1.a, mode='same')
+BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value3, title="Lọc HPF với cửa sổ blackman")
+
+value4 = np.convolve(loc.loc_am_thanh('EQ','blackman'), Audio1.a, mode='same')
+BieuDo.inBieuDoTrcVaSau2(audio1=Audio1,color1='red',color2='blue',audio2=value4, title="Lọc EQ với cửa sổ blackman")
+
+
 
 
 

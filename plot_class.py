@@ -19,10 +19,14 @@ class BieuDo:
         plt.plot(audio1.a,color1)
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
+        plt.grid()
+
         plt.subplot(2,1,2)
         plt.title('Đoạn âm thanh lúc sau')
         plt.plot(audio2,color2)
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.tight_layout()
+        plt.grid()
+
         plt.show()
