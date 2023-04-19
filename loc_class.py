@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Loc:
-    def __init__(self, N=101, fc=1000, fl=500, fh=1500, f1=2000,f2=3000,fs=44100,bw=100):
+    def __init__(self, N=101, fc=1000, fl=500, fh=1500, f1=2000,f2=3000,fs=44100,bw=10):
         # Kích thước mẫu lọc
         self.N = N
 
@@ -84,7 +84,11 @@ class Loc:
         for n in range(self.N):
             h_lpf[n] = self.ideal_filter_response_LPF(n, self.fc, self.ft)
         
-        return h_lpf
+        hd_lpf = np.zeros(self.N)
+        for n in range(self.N):
+            hd_lpf[n] = h_lpf[n - int((self.N - 1) / 2)]
+
+        return hd_lpf
 
 
     # Tạo ra hàm đáp ứng xung lý tưởng h(n) của bộ lọc BPF
@@ -93,7 +97,13 @@ class Loc:
         for n in range(self.N):
             h_bpf[n] = self.ideal_filter_response_BPF(n, self.fl, self.fh, self.ft)
 
-        return h_bpf
+
+        hd_bpf = np.zeros(self.N)
+        
+        for n in range(self.N):
+            hd_bpf[n] = h_bpf[n - int((self.N - 1) / 2)]
+
+        return hd_bpf
 
     # Tạo ra hàm đáp ứng xung lý tưởng h(n) của bộ lọc BSF
     def arr_BSF(self):
@@ -101,7 +111,12 @@ class Loc:
         for n in range(self.N):
             h_bsf[n] = self.ideal_filter_response_BSF(n, self.f1, self.f2, self.ft)
 
-        return h_bsf
+
+        hd_bsf = np.zeros(self.N)
+        for n in range(self.N):
+            hd_bsf[n] = h_bsf[n - int((self.N - 1) / 2)]
+
+        return hd_bsf
 
     # Tạo ra hàm đáp ứng xung lý tưởng h(n) của bộ lọc HPF
     def arr_HPF(self):
@@ -109,22 +124,49 @@ class Loc:
         for n in range(self.N):
             h_hpf[n] = self.ideal_filter_response_HPF(n, self.fc, self.ft)
 
-        return h_hpf
+
+        hd_hpf = np.zeros(self.N)
+        for n in range(self.N):
+            hd_hpf[n] = h_hpf[n - int((self.N - 1) / 2)]
+
+        return hd_hpf
 
     # Tạo ra hàm đáp ứng xung lý tưởng h(n) của bộ lọc EQ
     def arr_EQ(self):
         h_eq = np.zeros(self.N)
         for n in range(self.N):
             h_eq[n] = self.ideal_filter_response_EQ(n, self.fc, self.bw, self.ft)
-        return h_eq
+
+
+        hd_eq = np.zeros(self.N)
+        for n in range(self.N):
+            hd_eq[n] = h_eq[n - int((self.N - 1) / 2)]
+
+        return hd_eq
+
+    def rectangle_window(self,N):
+        return np.ones(N)
+
+    def bartlett_window(self,N):
+        i= N-1
+        a= [2 * x / i for x in range(0, i //2 + 1)]
+        b = [2-(2 * x / i) for x in range(i // 2 + 1,i + 1)]
+        return np.append(a,b)
+
+    def hanning_window(self,N):
+        return np.array([(0.5-(1-0.5)*np.cos(2*np.pi*x/(N-1))) for x in range(0,N)])
+
+    def hamming_window(self,N):
+        return np.array([(0.54-(1-0.54)*np.cos(2*np.pi*x/(N-1))) for x in range(0,N)])
+
+    def blackman_window(self,N):
+        return np.array([0.42 -0.5*np.cos(2*np.pi*x/(N-1))+0.08*np.cos(4*np.pi*x/(N-1)) for x in range(0,N)])
 
     def loc_am_thanh(self, mode, window):
 
         # tao mang theo mode
         arr_loc = self.arr_LPF()
-        if mode == 'LPF':
-            arr_loc = self.arr_LPF()
-        elif mode == 'BDF':
+        if mode == 'BDF':
             arr_loc = self.arr_BDF()
         elif mode == 'BSF':
             arr_loc = self.arr_BSF()
@@ -133,24 +175,32 @@ class Loc:
         elif mode == 'EQ':
             arr_loc = self.arr_EQ()
         else:
+            # default LPF
             arr_loc = self.arr_LPF()
+
 
         # tao cua so theo mode
         window_loc = np.hanning(self.N)
         if window == 'bartlett':
-            window_loc = np.bartlett(self.N)
+            # window_loc = np.bartlett(self.N)
+            window_loc = self.bartlett_window(self.N)
         elif window == 'hamming':
-            window_loc = np.hamming(self.N)
+            # window_loc = np.hamming(self.N)
+            window_loc = self.hamming_window(self.N)
         elif window == 'hanning':
-            window_loc = np.hanning(self.N)
-        else:
-            window_loc = np.blackman(self.N)
+            # window_loc = np.hanning(self.N)
+            window_loc = self.hanning_window(self.N)
+
+        elif window == 'blackman':
+            # window_loc = np.blackman(self.N)
+            window_loc = self.blackman_window(self.N)
+        else :
+            window_loc = self.rectangle_window(self.N)
 
         # Nhân hàm cửa sổ vào hàm đáp ứng xung lý tưởng của bộ lọc 
         # print(window_loc)
         # print (arr_loc * window_loc)
         return arr_loc * window_loc
-
 
 
 
